@@ -970,7 +970,8 @@
 </head>
 <body class="font-poppins" x-data="homePage()">
     <!-- Navigation -->
-    @include('customer.partials.navigation')
+    {{-- @include('customer.partials.navigation') --}}
+    @include('customer.partials.navigation', ['skipAlpine' => true])
 
     <!-- 🚀 Hero Section -->
     <section class="hero-section">

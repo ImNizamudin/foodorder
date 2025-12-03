@@ -89,10 +89,10 @@
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#" class="text-gray-600 hover:text-primary-600 font-medium">Home</a>
-                    <a href="#" class="text-gray-600 hover:text-primary-600 font-medium">Restaurants</a>
-                    <a href="#" class="text-gray-600 hover:text-primary-600 font-medium">How It Works</a>
-                    <a href="#" class="text-gray-600 hover:text-primary-600 font-medium">About Us</a>
+                    <a href="{{ route('landing.home') }}" class="text-primary-600 hover:text-primary-600 font-medium">Home</a>
+                    <a href="{{ route('landing.restaurants') }}" class="text-gray-600 hover:text-primary-600 font-medium">Restaurants</a>
+                    <a href="{{ route('landing.how-it-works') }}" class="text-gray-600 font-medium">How It Works</a>
+                    <a href="{{ route('landing.about-us') }}" class="text-gray-600 hover:text-primary-600 font-medium">About Us</a>
                 </div>
 
                 <!-- Auth Buttons -->

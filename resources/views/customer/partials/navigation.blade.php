@@ -261,15 +261,24 @@
                     <i class='bx bx-cart text-2xl'></i>
                     <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary-500 rounded-full text-xs flex items-center justify-center text-white" id="cart-count">
                         @php
-                            $cart = session()->get('cart', []);
                             $cartCount = 0;
+                            $cart = session()->get('cart', []);
                             foreach ($cart as $item) {
                                 $cartCount += $item['quantity'] ?? 0;
                             }
-                            echo $cartCount;
                         @endphp
                     </span>
                 </a>
+
+                {{-- <a href="{{ route('customer.cart') }}" class="relative p-2 text-gray-600 hover:text-primary-600 transition" id="nav-cart">
+                    <i class='bx bx-cart text-2xl'></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-primary-500 rounded-full text-xs flex items-center justify-center text-white"
+                        id="cart-count"
+                        data-initial-count="{{ $cartCount }}">
+                        {{ $cartCount }}
+                    </span>
+                </a> --}}
+
 
                 @auth
                 <!-- User Profile -->
@@ -930,10 +939,30 @@ document.getElementById('user-dropdown')?.addEventListener('mouseenter', functio
 });
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Navigation loaded');
+// document.addEventListener('DOMContentLoaded', function() {
+//     console.log('Navigation loaded');
 
-    // Close any open dropdowns
+//     // Close any open dropdowns
+//     closeUserDropdown();
+// });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const cartCountElement = document.getElementById('cart-count');
+    if (!cartCountElement) return;
+
+    const initialCount = cartCountElement.getAttribute('data-initial-count');
+    console.log('Initial cart count from server:', initialCount);
+
+    // Load fresh count dari API
+    fetch('{{ route("customer.cart.get") }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.cart_count != initialCount) {
+                cartCountElement.textContent = data.cart_count;
+                console.log('Cart count updated from API:', data.cart_count);
+            }
+        });
+
     closeUserDropdown();
 });
 </script>

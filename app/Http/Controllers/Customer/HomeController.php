@@ -61,6 +61,50 @@ class HomeController extends Controller
         ]);
     }
 
+    public function landing()
+    {
+        if (Auth::check()) {
+            // If user is logged in, redirect to home
+            return redirect()->route('home');
+        }
+
+        return view('customer.landing', [
+            'title' => 'FoodOrder - Order Makanan Online'
+        ]);
+    }
+
+    public function restaurants()
+    {
+        if (Auth::check()) {
+            // If user is logged in, redirect to customer restaurants page
+            return redirect()->route('customer.restaurants');
+        }
+
+        return view('customer.restaurants', [
+            'title' => 'Restaurants - FoodOrder'
+        ]);
+    }
+
+    /**
+     * How It Works landing page
+     */
+    public function howItWorks()
+    {
+        return view('customer.how-it-works', [
+            'title' => 'How It Works - FoodOrder'
+        ]);
+    }
+
+    /**
+     * About Us landing page
+     */
+    public function aboutUs()
+    {
+        return view('customer.about-us', [
+            'title' => 'About Us - FoodOrder'
+        ]);
+    }
+
     private function getRestaurantCoverImage(Restaurant $restaurant)
     {
         // Jika restaurant memiliki cover image sendiri

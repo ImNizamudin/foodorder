@@ -7,6 +7,7 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Restaurant;
+use App\Helpers\CartHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -44,7 +45,6 @@ class CustomerCartController extends Controller
     {
         $cart = session()->get('cart', []);
         $cartItems = [];
-        $cartCount = 0;
 
         foreach ($cart as $item) {
             $menuItem = MenuItem::find($item['menu_item_id']);
@@ -57,14 +57,19 @@ class CustomerCartController extends Controller
                     'image' => $menuItem->image,
                     'customizations' => $item['customizations'] ?? []
                 ];
-                $cartCount += $item['quantity'];
             }
         }
+
+        // Gunakan CartHelper untuk konsistensi
+        $cartCount = CartHelper::count();
 
         return response()->json([
             'success' => true,
             'cart_items' => $cartItems,
-            'cart_count' => $cartCount
+            'cart_count' => $cartCount,
+            'total' => array_reduce($cartItems, function($sum, $item) {
+                return $sum + ($item['price'] * $item['quantity']);
+            }, 0)
         ]);
     }
 
@@ -81,7 +86,8 @@ class CustomerCartController extends Controller
         if (!$menuItem->is_available) {
             return response()->json([
                 'success' => false,
-                'message' => 'This item is currently unavailable'
+                'message' => 'This item is currently unavailable',
+                'cart_count' => CartHelper::count()
             ], 400);
         }
 
@@ -103,7 +109,7 @@ class CustomerCartController extends Controller
 
                 session()->put('cart', $cart);
 
-                $cartCount = $request->quantity;
+                $cartCount = CartHelper::count();
 
                 return response()->json([
                     'success' => true,
@@ -138,10 +144,8 @@ class CustomerCartController extends Controller
 
         session()->put('cart', $cart);
 
-        $cartCount = 0;
-        foreach ($cart as $item) {
-            $cartCount += $item['quantity'];
-        }
+        // Gunakan CartHelper untuk konsistensi
+        $cartCount = CartHelper::count();
 
         return response()->json([
             'success' => true,
@@ -185,10 +189,8 @@ class CustomerCartController extends Controller
 
         session()->put('cart', $cart);
 
-        $cartCount = 0;
-        foreach ($cart as $item) {
-            $cartCount += $item['quantity'];
-        }
+        // Gunakan CartHelper untuk konsistensi
+        $cartCount = CartHelper::count();
 
         return response()->json([
             'success' => true,
@@ -210,10 +212,8 @@ class CustomerCartController extends Controller
 
         session()->put('cart', $cart);
 
-        $cartCount = 0;
-        foreach ($cart as $item) {
-            $cartCount += $item['quantity'];
-        }
+        // Gunakan CartHelper untuk konsistensi
+        $cartCount = CartHelper::count();
 
         return response()->json([
             'success' => true,
@@ -226,63 +226,15 @@ class CustomerCartController extends Controller
     {
         session()->forget('cart');
 
+        // Gunakan CartHelper untuk konsistensi
+        $cartCount = CartHelper::count();
+
         return response()->json([
             'success' => true,
             'message' => 'Cart cleared successfully',
-            'cart_count' => 0
+            'cart_count' => $cartCount
         ]);
     }
-
-    // public function checkout()
-    // {
-    //     $cart = session()->get('cart', []);
-
-    //     if (empty($cart)) {
-    //         return redirect()->route('customer.cart')->with('error', 'Your cart is empty');
-    //     }
-
-    //     $cartItems = [];
-    //     $total = 0;
-    //     $restaurantId = null;
-
-    //     foreach ($cart as $item) {
-    //         $menuItem = MenuItem::with('restaurant')->find($item['menu_item_id']);
-    //         if ($menuItem) {
-    //             if (!$restaurantId) {
-    //                 $restaurantId = $menuItem->restaurant_id;
-    //             }
-
-    //             $itemTotal = $menuItem->price * $item['quantity'];
-    //             $cartItems[] = [
-    //                 'menu_item' => $menuItem,
-    //                 'quantity' => $item['quantity'],
-    //                 'total_price' => $itemTotal,
-    //                 'customizations' => $item['customizations'] ?? []
-    //             ];
-    //             $total += $itemTotal;
-    //         }
-    //     }
-
-    //     $restaurant = Restaurant::find($restaurantId);
-
-    //     return view('customer.checkout.index', [
-    //         'title' => 'Checkout - FoodOrder',
-    //         'cartItems' => $cartItems,
-    //         'total' => $total,
-    //         'restaurant' => $restaurant
-    //     ]);
-    // }
-
-    // public function placeOrder(Request $request)
-    // {
-    //     // This will be implemented in the next phase
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Order placed successfully',
-    //         'order_id' => 1 // Temporary
-    //     ]);
-    // }
-
 
     // ======================================================================
 
@@ -366,7 +318,8 @@ class CustomerCartController extends Controller
             if (empty($cart)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Your cart is empty'
+                    'message' => 'Your cart is empty',
+                    'cart_count' => CartHelper::count()
                 ], 400);
             }
 
@@ -484,6 +437,7 @@ class CustomerCartController extends Controller
                 'message' => 'Order placed successfully!',
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
+                'cart_count' => CartHelper::count(), // Tambahkan cart count setelah order
                 'redirect_url' => route('customer.orders.confirmation', $order)
             ]);
 
@@ -493,7 +447,8 @@ class CustomerCartController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Please check your information and try again.',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
+                'cart_count' => CartHelper::count()
             ], 422);
 
         } catch (\Exception $e) {
@@ -506,7 +461,8 @@ class CustomerCartController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage() ?: 'Failed to place order. Please try again.'
+                'message' => $e->getMessage() ?: 'Failed to place order. Please try again.',
+                'cart_count' => CartHelper::count()
             ], 500);
         }
     }

@@ -40,6 +40,11 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/', function () {
         return view('customer.landing');
     });
+
+    Route::get('/', [HomeController::class, 'landing'])->name('landing.home');
+    Route::get('/landing/restaurants', [HomeController::class, 'restaurants'])->name('landing.restaurants');
+    Route::get('/landing/how-it-works', [HomeController::class, 'howItWorks'])->name('landing.how-it-works');
+    Route::get('/landing/about-us', [HomeController::class, 'aboutUs'])->name('landing.about-us');
 });
 
 // Admin Routes
