@@ -14,6 +14,9 @@ class HomeController extends Controller
 {
     public function index()
     {
+        header("Cache-Control: no-cache, no-store, must-revalidate");
+        header("Pragma: no-cache");
+        header("Expires: 0");
         if (Auth::check()) {
             // Get real data from database
             $featuredRestaurants = Restaurant::where('status', 'active')
